@@ -1,3 +1,5 @@
+#ifndef GRAVITYSIMULATION_H
+#define GRAVITYSIMULATION_H
 class GravitySimulation {
 
 	private:
@@ -10,3 +12,4 @@ class GravitySimulation {
 		float getDistance(float seconds, float mass);
 
 };
+#endif

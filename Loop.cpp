@@ -6,6 +6,7 @@
 #include <string>
 #include <unistd.h>
 
+#include "ConfigReader.h"
 #include "Controls.h"
 #include "Direction.h"
 #include "Entity.h"
@@ -28,7 +29,7 @@ struct mapDimensions {
 };
 
 static GravitySimulation gSim(9.1, 0.1);
-static Controls controls;
+static Controls controls(ConfigReader::getConfig("keys-default.properties"));
 static Entity myPlayer(100, 50, 500, 75, 10, 10, 10);
 static Entity myBox(400, 80, 500, 10, 30, 30, 30);
 static Entity myBox2(650, 200, 500, 10, 30, 30, 30);
@@ -85,34 +86,34 @@ static gboolean handle_tick(GtkWidget *widget, GdkFrameClock *frame_clock,
     LegalDistances legalDistances =
         mapCollisionHandling.getLegalMovement(&myPlayer, myMapEntities, 2);
 
-    if (controls.isPressed(65)) {
+    if (controls.isPressed("SPACE")) {
       float maxFlyDistance =
           mapCollisionHandling.getMaxFlyDistance(&myPlayer, myMapEntities, 2);
       // cout << "MAX FLY" << maxFlyDistance << endl;
       myPlayer.fly(10 < maxFlyDistance ? 10 : maxFlyDistance);
     }
-    if (controls.isPressed(113)) {
+    if (controls.isPressed("LEFT")) {
       float oldX = myPlayer.getX();
       myPlayer.move(Direction::XBACKW, 2);
       if (mapCollisionHandling.colliding(&myPlayer, myMapEntities, 2)) {
         myPlayer.setX(oldX);
       }
     }
-    if (controls.isPressed(114)) {
+    if (controls.isPressed("RIGHT")) {
       float oldX = myPlayer.getX();
       myPlayer.move(Direction::XFORW, 2);
       if (mapCollisionHandling.colliding(&myPlayer, myMapEntities, 2)) {
         myPlayer.setX(oldX);
       }
     }
-    if (controls.isPressed(116)) {
+    if (controls.isPressed("DOWN")) {
       float oldZ = myPlayer.getZ();
       myPlayer.move(Direction::ZBACKW, 2);
       if (mapCollisionHandling.colliding(&myPlayer, myMapEntities, 2)) {
         myPlayer.setZ(oldZ);
       }
     }
-    if (controls.isPressed(111)) {
+    if (controls.isPressed("UP")) {
       float oldZ = myPlayer.getZ();
       myPlayer.move(Direction::ZFORW, 2);
       if (mapCollisionHandling.colliding(&myPlayer, myMapEntities, 2)) {
