@@ -1,7 +1,9 @@
 #ifndef VALIDATION_H
 #define VALIDATION_H
 
-#include <gtk/gtk.h>
+#include <iostream>
+
+using namespace std;
 
 namespace Validation {
 
@@ -13,7 +15,7 @@ inline static bool isValidDimension(float f) {
       throw(f);
     }
   } catch (float ex) {
-    g_print("Dimenstion value < 0: %f\n", ex);
+    cout << "Dimenison value < 0: " << ex << endl;
     return false;
   }
   return false;
@@ -27,7 +29,7 @@ inline static bool isValidCoordinate(float f) {
       throw(f);
     }
   } catch (float ex) {
-    g_print("Coordinate value < 0: %f\n", ex);
+    cout << "Coordinate value < 0: " << ex << endl;
     return false;
   }
   return false;
@@ -41,7 +43,7 @@ inline static bool isValidMass(float f) {
       throw(f);
     }
   } catch (float ex) {
-    g_print("Mass value < 0: %f\n", ex);
+    cout << "Mass value < 0: " << ex << endl;
     return false;
   }
   return false;

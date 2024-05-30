@@ -1,5 +1,4 @@
 #include "GravitySimulation.h"
-using namespace std;
 
 GravitySimulation::GravitySimulation(float gravityVelocity) {
 	this->gravityVelocity = gravityVelocity;
