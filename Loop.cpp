@@ -63,14 +63,15 @@ static void draw_function(GtkDrawingArea *area, cairo_t *cr, int width,
   cairo_rectangle(cr, myPlayer.getX() - myPlayer.getDimX(),
                   height - myPlayer.getY() - myPlayer.getDimY(),
                   myPlayer.getDimX() * 2, myPlayer.getDimY() * 2);
-  for (int i = 0; i < 2; i++) {
+  cairo_set_source_rgb(cr, 0.3, 0.6, 0.4);
+  cairo_fill(cr);
+  for (int i = 0; i < myMapEntities.size(); i++) {
     Entity e = myMapEntities.at(i);
     cairo_rectangle(cr, e.getX() - e.getDimX(),
                     height - e.getY() - e.getDimY(), e.getDimX() * 2,
                     e.getDimY() * 2);
   }
   cairo_set_source_rgb(cr, 0.7, 0.4, 0.6);
-
   cairo_fill(cr);
 }
 
