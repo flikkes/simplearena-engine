@@ -25,7 +25,8 @@ using std::end;
 static gint64 oldTime = 0;
 static gint64 newTime = 0;
 
-struct mapDimensions {
+struct mapDimensions
+{
   float dimX = 800;
   float dimY = 800;
   float dimZ = 800;
@@ -46,7 +47,8 @@ static GtkWidget *area;
 
 static void handle_key_pressed(GtkEventControllerKey *self, guint keyval,
                                guint keycode, GdkModifierType state,
-                               gpointer user_data) {
+                               gpointer user_data)
+{
   g_print("Press from key %d\n", keycode);
 
   controls.press(keycode);
@@ -54,18 +56,21 @@ static void handle_key_pressed(GtkEventControllerKey *self, guint keyval,
 
 static void handle_key_released(GtkEventControllerKey *self, guint keyval,
                                 guint keycode, GdkModifierType state,
-                                gpointer user_data) {
+                                gpointer user_data)
+{
   controls.release(keycode);
 }
 
 static void draw_function(GtkDrawingArea *area, cairo_t *cr, int width,
-                          int height, gpointer data) {
+                          int height, gpointer data)
+{
   cairo_rectangle(cr, myPlayer.getX() - myPlayer.getDimX(),
                   height - myPlayer.getY() - myPlayer.getDimY(),
                   myPlayer.getDimX() * 2, myPlayer.getDimY() * 2);
   cairo_set_source_rgb(cr, 0.3, 0.6, 0.4);
   cairo_fill(cr);
-  for (int i = 0; i < myMapEntities.size(); i++) {
+  for (int i = 0; i < myMapEntities.size(); i++)
+  {
     Entity e = myMapEntities.at(i);
     cairo_rectangle(cr, e.getX() - e.getDimX(),
                     height - e.getY() - e.getDimY(), e.getDimX() * 2,
@@ -76,65 +81,80 @@ static void draw_function(GtkDrawingArea *area, cairo_t *cr, int width,
 }
 
 static gboolean handle_tick(GtkWidget *widget, GdkFrameClock *frame_clock,
-                            gpointer user_data) {
+                            gpointer user_data)
+{
   newTime = gdk_frame_clock_get_frame_time(frame_clock);
 
-  if (newTime - oldTime > 33332) {
+  if (newTime - oldTime > 33332)
+  {
     LegalDistances legalDistances =
         mapCollisionHandling.getLegalMovement(&myPlayer, myMapEntities, myMapEntities.size());
 
-    if (controls.isPressed("SPACE")) {
+    if (controls.isPressed("SPACE"))
+    {
       float maxFlyDistance =
           mapCollisionHandling.getMaxFlyDistance(&myPlayer, myMapEntities, myMapEntities.size());
-      if (jumpUp.attemptFinish(&myPlayer) && !myPlayer.isFalling()) {
+      if (jumpUp.attemptFinish(&myPlayer) && !myPlayer.isFalling())
+      {
         jumpUp = Animation(0, myPlayer.getY(), 0,
                            myPlayer.getY() +
                                (150 < maxFlyDistance ? 150 : maxFlyDistance),
                            20);
       }
     }
-    if (controls.isPressed("LEFT")) {
+    if (controls.isPressed("LEFT"))
+    {
       float oldX = myPlayer.getX();
       myPlayer.move(Direction::XBACKW, 8);
-      if (mapCollisionHandling.colliding(&myPlayer, myMapEntities, myMapEntities.size())) {
+      if (mapCollisionHandling.colliding(&myPlayer, myMapEntities, myMapEntities.size()))
+      {
         myPlayer.setX(oldX);
       }
     }
-    if (controls.isPressed("RIGHT")) {
+    if (controls.isPressed("RIGHT"))
+    {
       float oldX = myPlayer.getX();
       myPlayer.move(Direction::XFORW, 8);
-      if (mapCollisionHandling.colliding(&myPlayer, myMapEntities, myMapEntities.size())) {
+      if (mapCollisionHandling.colliding(&myPlayer, myMapEntities, myMapEntities.size()))
+      {
         myPlayer.setX(oldX);
       }
     }
-    if (controls.isPressed("DOWN")) {
+    if (controls.isPressed("DOWN"))
+    {
       float oldZ = myPlayer.getZ();
       myPlayer.move(Direction::ZBACKW, 8);
-      if (mapCollisionHandling.colliding(&myPlayer, myMapEntities, myMapEntities.size())) {
+      if (mapCollisionHandling.colliding(&myPlayer, myMapEntities, myMapEntities.size()))
+      {
         myPlayer.setZ(oldZ);
       }
     }
-    if (controls.isPressed("UP")) {
+    if (controls.isPressed("UP"))
+    {
       float oldZ = myPlayer.getZ();
       myPlayer.move(Direction::ZFORW, 8);
-      if (mapCollisionHandling.colliding(&myPlayer, myMapEntities, myMapEntities.size())) {
+      if (mapCollisionHandling.colliding(&myPlayer, myMapEntities, myMapEntities.size()))
+      {
         myPlayer.setZ(oldZ);
       }
     }
 
-    if (!jumpUp.isFinished()) {
+    if (!jumpUp.isFinished())
+    {
       g_print("Player X: %f, Y: %f \n", myPlayer.getX(), myPlayer.getY());
       myPlayer.fly(jumpUp.getY(&myPlayer) - myPlayer.getY());
     }
 
     float maxFallDistance =
         mapCollisionHandling.getMaxFallDistance(&myPlayer, myMapEntities, myMapEntities.size());
-    if (maxFallDistance > 0) {
+    if (maxFallDistance > 0)
+    {
       myPlayer.setFalling(true);
     }
 
     float fallDistance = 0;
-    if (myPlayer.isFalling()) {
+    if (myPlayer.isFalling())
+    {
       g_print("New time: %d Old time: %d\n", newTime, oldTime);
       float seconds =
           (myPlayer.getFallTime() + (newTime - oldTime) / 1000000.0);
@@ -144,9 +164,12 @@ static gboolean handle_tick(GtkWidget *widget, GdkFrameClock *frame_clock,
       simFallDistance = simFallDistance < 0 ? 0 : simFallDistance;
       fallDistance =
           simFallDistance < maxFallDistance ? simFallDistance : maxFallDistance;
-      if (fallDistance <= 0) {
+      if (fallDistance <= 0)
+      {
         myPlayer.stopFalling();
-      } else {
+      }
+      else
+      {
         myPlayer.fall(myPlayer.getFallTime() + seconds, fallDistance);
       }
     }
@@ -157,13 +180,14 @@ static gboolean handle_tick(GtkWidget *widget, GdkFrameClock *frame_clock,
   return G_SOURCE_CONTINUE;
 }
 
-static void activate(GtkApplication *app, gpointer user_data) {
-  //myMapEntities.push_back(myBox);
-  //myMapEntities.push_back(myBox2);
+static void activate(GtkApplication *app, gpointer user_data)
+{
+  // myMapEntities.push_back(myBox);
+  // myMapEntities.push_back(myBox2);
   myMapEntities = MapLoader::getMapEntities("maps/map1.smap");
   myPlayer = MapLoader::getPlayerEntities("maps/map1.smap").at(0);
-  //myMapEntities = mapEntities;
-  //myPlayer = playerEntities[0];
+  // myMapEntities = mapEntities;
+  // myPlayer = playerEntities[0];
 
   GtkWidget *window;
 
@@ -193,7 +217,8 @@ static void activate(GtkApplication *app, gpointer user_data) {
   gtk_window_present(GTK_WINDOW(window));
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
   GtkApplication *app;
   int status;
 

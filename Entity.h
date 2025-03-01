@@ -3,70 +3,70 @@
 
 #include "Direction.h"
 
-class Entity {
-    private:
-        float x;
-        float y;
-        float z;
+class Entity
+{
+private:
+  float x;
+  float y;
+  float z;
 
-        float plannedDistanceXF;
-        float plannedDistanceYF;
-        float plannedDistanceZF;
-        float plannedDistanceXB;
-        float plannedDistanceYB;
-        float plannedDistanceZB;
-        
-        float dimX;
-        float dimY;
-        float dimZ;
+  float plannedDistanceXF;
+  float plannedDistanceYF;
+  float plannedDistanceZF;
+  float plannedDistanceXB;
+  float plannedDistanceYB;
+  float plannedDistanceZB;
 
-        float mass;
-        float fallTime;
-        bool falling;
+  float dimX;
+  float dimY;
+  float dimZ;
 
-    public:
-        Entity(float x, float y, float z, float mass, float dimX, float dimY, float dimZ);
-        Entity(float x, float y, float z, float mass) : Entity(x, y, z, mass, 1, 1, 1) {};
+  float mass;
+  float fallTime;
+  bool falling;
 
-        float getX();
-        void setX(float x);
-        float getY();
-        void setY(float y);
-        float getZ();
-        void setZ(float z);
+public:
+  Entity(float x, float y, float z, float mass, float dimX, float dimY, float dimZ);
+  Entity(float x, float y, float z, float mass) : Entity(x, y, z, mass, 1, 1, 1) {};
 
-        float getPlannedDistanceX(Direction direction);
-        void setPlannedDistanceX(Direction direction, float plannedDistanceX);
-        float getPlannedDistanceY(Direction direction);
-        void setPlannedDistanceY(Direction direction, float plannedDistanceY);
-        float getPlannedDistanceZ(Direction direction);
-        void setPlannedDistanceZ(Direction direction, float plannedDistanceZ);
+  float getX();
+  void setX(float x);
+  float getY();
+  void setY(float y);
+  float getZ();
+  void setZ(float z);
 
-        void resetPlannedDistances();
+  float getPlannedDistanceX(Direction direction);
+  void setPlannedDistanceX(Direction direction, float plannedDistanceX);
+  float getPlannedDistanceY(Direction direction);
+  void setPlannedDistanceY(Direction direction, float plannedDistanceY);
+  float getPlannedDistanceZ(Direction direction);
+  void setPlannedDistanceZ(Direction direction, float plannedDistanceZ);
 
+  void resetPlannedDistances();
 
-        void move(Direction direction, float distance);
+  void move(Direction direction, float distance);
 
-        float getDimX();
-        void setDimX(float dimX);
-        float getDimY();
-        void setDimY(float dimY);
-        float getDimZ();
-        void setDimZ(float dimZ);
+  float getDimX();
+  void setDimX(float dimX);
+  float getDimY();
+  void setDimY(float dimY);
+  float getDimZ();
+  void setDimZ(float dimZ);
 
-        bool isColliding(Entity *questioner);
-        bool isCollidingXZ(Entity *questioner);
-        bool isOnPosition(float x, float y, float z);
-        void placeOn(Entity *destination);
+  bool isColliding(Entity *questioner);
+  bool isCollidingXZ(Entity *questioner);
+  bool isOnPosition(float x, float y, float z);
+  void placeOn(Entity *destination);
 
-        float getMass();
-        void setMass(float mass);
-        
-        float getFallTime();
-        bool isFalling();
-        void setFalling(bool falling);
-        void fall(float fallTime, float fallDistance);
-        void fly(float y);
-        void stopFalling();
+  float getMass();
+  void setMass(float mass);
+
+  float getFallTime();
+  bool isFalling();
+  void setFalling(bool falling);
+  void fall(float fallTime, float fallDistance);
+  void fly(float y);
+  void stopFalling();
 };
 #endif

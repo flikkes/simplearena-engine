@@ -8,7 +8,8 @@
 
 using namespace std;
 
-class MapCollisionHandling {
+class MapCollisionHandling
+{
 private:
   float mapDimX;
   float mapDimY;

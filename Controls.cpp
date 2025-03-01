@@ -6,7 +6,8 @@
 
 using namespace std;
 
-Controls::Controls() {
+Controls::Controls()
+{
   this->NONE.name = "NONE";
   this->NONE.code = -5;
   this->NONE.pressed = false;
@@ -44,14 +45,16 @@ Controls::Controls() {
   this->keyCount = 5;
 }
 
-Controls::Controls(vector<configentry> config) {
+Controls::Controls(vector<configentry> config)
+{
   this->NONE.name = "NONE";
   this->NONE.code = -5;
   this->NONE.pressed = false;
 
   this->keyCount = config.size() > 20 ? 20 : config.size();
 
-  for (int i = 0; i < this->keyCount; i++) {
+  for (int i = 0; i < this->keyCount; i++)
+  {
     configentry entry = config.at(i);
     key k;
     k.name = entry.name;
@@ -65,32 +68,40 @@ bool Controls::isPressed(int code) { return this->getKeyByCode(code)->pressed; }
 
 bool Controls::isPressed(string name) { return this->getKeyByName(name)->pressed; }
 
-void Controls::press(int code) {
+void Controls::press(int code)
+{
   key *k = this->getKeyByCode(code);
   k->pressed = true;
 }
 
-void Controls::release(int code) {
+void Controls::release(int code)
+{
   key *k = this->getKeyByCode(code);
   k->pressed = false;
 }
 
 string Controls::getKeyName(int code) { return this->getKeyByCode(code)->name; }
 
-Controls::key *Controls::getKeyByCode(int code) {
+Controls::key *Controls::getKeyByCode(int code)
+{
   // cout << "searching key with code " << code << endl;
-  for (int i = 0; i < this->keyCount; i++) {
-    if (this->keys[i].code == code) {
+  for (int i = 0; i < this->keyCount; i++)
+  {
+    if (this->keys[i].code == code)
+    {
       return &this->keys[i];
     }
   }
   return &this->NONE;
 }
 
-Controls::key *Controls::getKeyByName(string name) {
+Controls::key *Controls::getKeyByName(string name)
+{
   // cout << "searching key with code " << code << endl;
-  for (int i = 0; i < this->keyCount; i++) {
-    if (this->keys[i].name == name) {
+  for (int i = 0; i < this->keyCount; i++)
+  {
+    if (this->keys[i].name == name)
+    {
       return &this->keys[i];
     }
   }
