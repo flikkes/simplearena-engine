@@ -25,7 +25,6 @@ class Entity {
         bool falling;
 
     public:
-        Entity();
         Entity(float x, float y, float z, float mass, float dimX, float dimY, float dimZ);
         Entity(float x, float y, float z, float mass) : Entity(x, y, z, mass, 1, 1, 1) {};
 
@@ -67,7 +66,6 @@ class Entity {
         bool isFalling();
         void setFalling(bool falling);
         void fall(float fallTime, float fallDistance);
-        float wouldFall(float fallDistance);
         void fly(float y);
         void stopFalling();
 };

@@ -4,6 +4,7 @@
 #include "LegalDistances.h"
 #include <math.h>
 #include <iostream>
+#include <vector>
 
 using namespace std;
 
@@ -15,7 +16,7 @@ MapCollisionHandling::MapCollisionHandling(float mapDimX, float mapDimY,
 }
 
 LegalDistances MapCollisionHandling::getLegalMovement(Entity *player,
-                                                      Entity *entities[],
+                                                      vector<Entity> entities,
                                                       int count) {
   float pX = player->getX();
   float pY = player->getY();
@@ -35,17 +36,17 @@ LegalDistances MapCollisionHandling::getLegalMovement(Entity *player,
   legalDistances.zB = pZ - pDimZ  < 0 ? 0 : pZ - pDimZ ;
 
   for (int i = 0; i < count; i++) {
-    Entity *e = entities[i];
+    Entity e = entities.at(i);
 
-    float eX = e->getX();
-    float eY = e->getY();
-    float eZ = e->getZ();
-    float eDimX = e->getDimX();
-    float eDimY = e->getDimY();
-    float eDimZ = e->getDimZ();
+    float eX = e.getX();
+    float eY = e.getY();
+    float eZ = e.getZ();
+    float eDimX = e.getDimX();
+    float eDimY = e.getDimY();
+    float eDimZ = e.getDimZ();
     float legalDistance;
-    if (!this->isInLevelX(player, e) && this->isInLevelY(player, e) &&
-        this->isInLevelZ(player, e)) {
+    if (!this->isInLevelX(player, &e) && this->isInLevelY(player, &e) &&
+        this->isInLevelZ(player, &e)) {
       if (eX > pX) {
         legalDistance = eX - eDimX  - pX + pDimX ;
         if (legalDistance >= 0) {
@@ -63,8 +64,8 @@ LegalDistances MapCollisionHandling::getLegalMovement(Entity *player,
       }
     }
 
-    if (!this->isInLevelY(player, e) && this->isInLevelX(player, e) &&
-        this->isInLevelZ(player, e)) {
+    if (!this->isInLevelY(player, &e) && this->isInLevelX(player, &e) &&
+        this->isInLevelZ(player, &e)) {
       if (eY > pY) {
         legalDistance = eY - eDimY  - pY + pDimY ;
         if (legalDistance >= 0) {
@@ -82,8 +83,8 @@ LegalDistances MapCollisionHandling::getLegalMovement(Entity *player,
       }
     }
 
-    if (!this->isInLevelZ(player, e) && this->isInLevelX(player, e) &&
-        this->isInLevelY(player, e)) {
+    if (!this->isInLevelZ(player, &e) && this->isInLevelX(player, &e) &&
+        this->isInLevelY(player, &e)) {
       if (eZ > pZ) {
         legalDistance = eZ - eDimZ  - pZ + pDimZ ;
         if (legalDistance >= 0) {
@@ -104,14 +105,14 @@ LegalDistances MapCollisionHandling::getLegalMovement(Entity *player,
   return legalDistances;
 }
 
-bool MapCollisionHandling::colliding(Entity *questioner, Entity *entities[], int count) {
+bool MapCollisionHandling::colliding(Entity *questioner, vector<Entity> entities, int count) {
   bool colliding = false;
   if (questioner->getX() + questioner->getDimX()  >= this->mapDimX || questioner->getX() - questioner->getDimX()  <= 0) {
     return true;
   }
   for (int i = 0; i < count; i++) {
-    Entity *e = entities[i];
-    if (this->isInLevelX(questioner, e) && this->isInLevelY(questioner, e) && this->isInLevelZ(questioner, e)) {
+    Entity e = entities.at(i);
+    if (this->isInLevelX(questioner, &e) && this->isInLevelY(questioner, &e) && this->isInLevelZ(questioner, &e)) {
       return true;
     }
   }
@@ -122,17 +123,17 @@ bool MapCollisionHandling::collidingSingle(Entity *questioner, Entity *answerer)
   return this->isInLevelX(questioner, answerer) && this->isInLevelY(questioner, answerer) && this->isInLevelZ(questioner, answerer);
 }
 
-float MapCollisionHandling::getMaxFallDistance(Entity *questioner, Entity *entities[], int count) {
+float MapCollisionHandling::getMaxFallDistance(Entity *questioner, vector<Entity> entities, int count) {
   float pY = questioner->getY();
   float pDimY = questioner->getDimY();
 
   float distance = pY - pDimY;
 
   for(int i = 0; i < count; i++) {
-    Entity *e = entities[i];
-    float eY = e->getY();
-    float eDimY = e->getDimY();
-    if (this->isInLevelX(questioner, e) && this->isInLevelZ(questioner, e) && eY - eDimY -1 <= pY - pDimY) {
+    Entity e = entities.at(i);
+    float eY = e.getY();
+    float eDimY = e.getDimY();
+    if (this->isInLevelX(questioner, &e) && this->isInLevelZ(questioner, &e) && eY - eDimY -1 <= pY - pDimY) {
       float newDistance = pY - pDimY - eY - eDimY - 1;
       distance = newDistance < distance ? newDistance : distance;
     }
@@ -141,17 +142,17 @@ float MapCollisionHandling::getMaxFallDistance(Entity *questioner, Entity *entit
   return distance < 0 ? 0 : distance;
 }
 
-float MapCollisionHandling::getMaxFlyDistance(Entity *questioner, Entity *entities[], int count) {
+float MapCollisionHandling::getMaxFlyDistance(Entity *questioner, vector<Entity> entities, int count) {
   float pY = questioner->getY();
   float pDimY = questioner->getDimY();
 
   float distance = this->mapDimY - pY - pDimY;
 
   for(int i = 0; i < count; i++) {
-    Entity *e = entities[i];
-    float eY = e->getY();
-    float eDimY = e->getDimY();
-    if (this->isInLevelX(questioner, e) && this->isInLevelZ(questioner, e) && eY - eDimY >= pY - pDimY - 1) {
+    Entity e = entities.at(i);
+    float eY = e.getY();
+    float eDimY = e.getDimY();
+    if (this->isInLevelX(questioner, &e) && this->isInLevelZ(questioner, &e) && eY - eDimY >= pY - pDimY - 1) {
       float newDistance = eY - eDimY - pY - pDimY - 1;
       distance = newDistance < distance ? newDistance : distance;
     }

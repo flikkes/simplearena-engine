@@ -5,7 +5,9 @@
 #include <iterator>
 #include <string>
 #include <unistd.h>
+#include <vector>
 
+#include "Animation.h"
 #include "ConfigReader.h"
 #include "Controls.h"
 #include "Direction.h"
@@ -13,14 +15,15 @@
 #include "GravitySimulation.h"
 #include "LegalDistances.h"
 #include "MapCollisionHandling.h"
+#include "MapLoader.h"
 
 using namespace std;
 using namespace chrono;
 using std::begin;
 using std::end;
 
-static uint64_t oldTime = 0;
-static uint64_t newTime = 0;
+static gint64 oldTime = 0;
+static gint64 newTime = 0;
 
 struct mapDimensions {
   float dimX = 800;
@@ -28,22 +31,18 @@ struct mapDimensions {
   float dimZ = 800;
 };
 
-static GravitySimulation gSim(9.1, 0.1);
+static GravitySimulation gSim(9.8, 2.0);
 static Controls controls(ConfigReader::getConfig("keys-default.properties"));
-static Entity myPlayer(100, 50, 500, 75, 10, 10, 10);
-static Entity myBox(400, 80, 500, 10, 30, 30, 30);
-static Entity myBox2(650, 200, 500, 10, 30, 30, 30);
-static Entity *myMapEntities[10];
+static Entity myPlayer(100, 50, 50, 75, 10, 10, 10);
+static Entity myBox(200.0, 80.0, 50.0, 10, 30, 30, 30);
+static Entity myBox2(350.0, 200.0, 50.0, 10, 30, 30, 30);
+static vector<Entity> myMapEntities;
 static mapDimensions gameMap;
 static MapCollisionHandling mapCollisionHandling(gameMap.dimX, gameMap.dimY,
                                                  gameMap.dimZ);
+static Animation jumpUp(0, 0, 0, 0, 0);
 
 static GtkWidget *area;
-
-/* static void print_hello (GtkWidget *widget, gpointer data)
-{
-        g_print ("Hello World\n");
-} */
 
 static void handle_key_pressed(GtkEventControllerKey *self, guint keyval,
                                guint keycode, GdkModifierType state,
@@ -56,8 +55,6 @@ static void handle_key_pressed(GtkEventControllerKey *self, guint keyval,
 static void handle_key_released(GtkEventControllerKey *self, guint keyval,
                                 guint keycode, GdkModifierType state,
                                 gpointer user_data) {
-  // g_print ("Release from key %d\n", keycode);
-
   controls.release(keycode);
 }
 
@@ -67,10 +64,10 @@ static void draw_function(GtkDrawingArea *area, cairo_t *cr, int width,
                   height - myPlayer.getY() - myPlayer.getDimY(),
                   myPlayer.getDimX() * 2, myPlayer.getDimY() * 2);
   for (int i = 0; i < 2; i++) {
-    Entity *e = myMapEntities[i];
-    cairo_rectangle(cr, e->getX() - e->getDimX(),
-                    height - e->getY() - e->getDimY(), e->getDimX() * 2,
-                    e->getDimY() * 2);
+    Entity e = myMapEntities.at(i);
+    cairo_rectangle(cr, e.getX() - e.getDimX(),
+                    height - e.getY() - e.getDimY(), e.getDimX() * 2,
+                    e.getDimY() * 2);
   }
   cairo_set_source_rgb(cr, 0.7, 0.4, 0.6);
 
@@ -79,71 +76,79 @@ static void draw_function(GtkDrawingArea *area, cairo_t *cr, int width,
 
 static gboolean handle_tick(GtkWidget *widget, GdkFrameClock *frame_clock,
                             gpointer user_data) {
-  newTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch())
-                .count();
+  newTime = gdk_frame_clock_get_frame_time(frame_clock);
 
-  if (newTime - oldTime > 10) {
+  if (newTime - oldTime > 33332) {
     LegalDistances legalDistances =
-        mapCollisionHandling.getLegalMovement(&myPlayer, myMapEntities, 2);
+        mapCollisionHandling.getLegalMovement(&myPlayer, myMapEntities, myMapEntities.size());
 
     if (controls.isPressed("SPACE")) {
       float maxFlyDistance =
-          mapCollisionHandling.getMaxFlyDistance(&myPlayer, myMapEntities, 2);
-      // cout << "MAX FLY" << maxFlyDistance << endl;
-      myPlayer.fly(10 < maxFlyDistance ? 10 : maxFlyDistance);
+          mapCollisionHandling.getMaxFlyDistance(&myPlayer, myMapEntities, myMapEntities.size());
+      if (jumpUp.attemptFinish(&myPlayer) && !myPlayer.isFalling()) {
+        jumpUp = Animation(0, myPlayer.getY(), 0,
+                           myPlayer.getY() +
+                               (150 < maxFlyDistance ? 150 : maxFlyDistance),
+                           20);
+      }
     }
     if (controls.isPressed("LEFT")) {
       float oldX = myPlayer.getX();
-      myPlayer.move(Direction::XBACKW, 2);
-      if (mapCollisionHandling.colliding(&myPlayer, myMapEntities, 2)) {
+      myPlayer.move(Direction::XBACKW, 8);
+      if (mapCollisionHandling.colliding(&myPlayer, myMapEntities, myMapEntities.size())) {
         myPlayer.setX(oldX);
       }
     }
     if (controls.isPressed("RIGHT")) {
       float oldX = myPlayer.getX();
-      myPlayer.move(Direction::XFORW, 2);
-      if (mapCollisionHandling.colliding(&myPlayer, myMapEntities, 2)) {
+      myPlayer.move(Direction::XFORW, 8);
+      if (mapCollisionHandling.colliding(&myPlayer, myMapEntities, myMapEntities.size())) {
         myPlayer.setX(oldX);
       }
     }
     if (controls.isPressed("DOWN")) {
       float oldZ = myPlayer.getZ();
-      myPlayer.move(Direction::ZBACKW, 2);
-      if (mapCollisionHandling.colliding(&myPlayer, myMapEntities, 2)) {
+      myPlayer.move(Direction::ZBACKW, 8);
+      if (mapCollisionHandling.colliding(&myPlayer, myMapEntities, myMapEntities.size())) {
         myPlayer.setZ(oldZ);
       }
     }
     if (controls.isPressed("UP")) {
       float oldZ = myPlayer.getZ();
-      myPlayer.move(Direction::ZFORW, 2);
-      if (mapCollisionHandling.colliding(&myPlayer, myMapEntities, 2)) {
+      myPlayer.move(Direction::ZFORW, 8);
+      if (mapCollisionHandling.colliding(&myPlayer, myMapEntities, myMapEntities.size())) {
         myPlayer.setZ(oldZ);
       }
     }
 
+    if (!jumpUp.isFinished()) {
+      g_print("Player X: %f, Y: %f \n", myPlayer.getX(), myPlayer.getY());
+      myPlayer.fly(jumpUp.getY(&myPlayer) - myPlayer.getY());
+    }
+
     float maxFallDistance =
-        mapCollisionHandling.getMaxFallDistance(&myPlayer, myMapEntities, 2);
+        mapCollisionHandling.getMaxFallDistance(&myPlayer, myMapEntities, myMapEntities.size());
     if (maxFallDistance > 0) {
       myPlayer.setFalling(true);
     }
 
     float fallDistance = 0;
     if (myPlayer.isFalling()) {
-      float seconds = (myPlayer.getFallTime() + 10) / 1000.0;
-      float simFallDistance = gSim.getDistance(seconds, myPlayer.getMass());
+      g_print("New time: %d Old time: %d\n", newTime, oldTime);
+      float seconds =
+          (myPlayer.getFallTime() + (newTime - oldTime) / 1000000.0);
+      g_print("Fall seconds added: %f\n", seconds);
+      // float simFallDistance = gSim.getDistance(seconds, myPlayer.getMass());
+      float simFallDistance = gSim.getDistance(seconds);
       simFallDistance = simFallDistance < 0 ? 0 : simFallDistance;
       fallDistance =
           simFallDistance < maxFallDistance ? simFallDistance : maxFallDistance;
       if (fallDistance <= 0) {
         myPlayer.stopFalling();
       } else {
-        myPlayer.fall(myPlayer.getFallTime() + 10, fallDistance);
+        myPlayer.fall(myPlayer.getFallTime() + seconds, fallDistance);
       }
     }
-
-    /* g_print("Player posX: %f\n", myPlayer.getX());
-    g_print("Player posY: %f\n", myPlayer.getY());
-    g_print("Player posZ: %f\n", myPlayer.getZ()); */
     gtk_widget_queue_draw(area);
     oldTime = newTime;
   }
@@ -152,12 +157,14 @@ static gboolean handle_tick(GtkWidget *widget, GdkFrameClock *frame_clock,
 }
 
 static void activate(GtkApplication *app, gpointer user_data) {
-  myMapEntities[0] = &myBox;
-  myMapEntities[1] = &myBox2;
-  // myPlayer.fall(10, 10);
+  //myMapEntities.push_back(myBox);
+  //myMapEntities.push_back(myBox2);
+  myMapEntities = MapLoader::getMapEntities("maps/map1.smap");
+  myPlayer = MapLoader::getPlayerEntities("maps/map1.smap").at(0);
+  //myMapEntities = mapEntities;
+  //myPlayer = playerEntities[0];
 
   GtkWidget *window;
-  // GtkWidget *button;
 
   GtkEventController *keyCtrl;
 
@@ -172,10 +179,6 @@ static void activate(GtkApplication *app, gpointer user_data) {
                                  NULL);
   gtk_widget_set_valign(area, GtkAlign::GTK_ALIGN_CENTER);
   gtk_window_set_child(GTK_WINDOW(window), area);
-
-  /* button = gtk_button_new_with_label ("Hello World");
-  g_signal_connect (button, "clicked", G_CALLBACK (print_hello), NULL);
-  gtk_window_set_child (GTK_WINDOW (window), button); */
 
   keyCtrl = gtk_event_controller_key_new();
   g_signal_connect(keyCtrl, "key-pressed", G_CALLBACK(handle_key_pressed),

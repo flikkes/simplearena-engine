@@ -9,7 +9,7 @@ GravitySimulation::GravitySimulation(float gravityVelocity, float airDrag) {
 	this->airDrag = airDrag;
 }
 float GravitySimulation::getDistance(float seconds) {
-	return 0.5 * gravityVelocity * (seconds*seconds);
+	return 0.5 * gravityVelocity * (seconds * seconds);
 }
 float GravitySimulation::getDistance(float seconds, float mass) {
 	return 0.5 * gravityVelocity * (seconds * seconds) + (mass * seconds) - (airDrag * seconds);

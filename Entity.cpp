@@ -4,7 +4,8 @@
 #include "Direction.h"
 #include "Validation.h"
 
-Entity::Entity(float x, float y, float z, float mass, float dimX, float dimY, float dimZ) {
+Entity::Entity(float x, float y, float z, float mass, float dimX, float dimY, float dimZ)
+{
     this->setX(x);
     this->setY(y);
     this->setZ(z);

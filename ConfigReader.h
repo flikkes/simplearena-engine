@@ -21,7 +21,7 @@ public:
     while (getline(PropFile, line)) {
         int delimiterPos = line.find("=");
         cout << "Delimiter pos: " << delimiterPos << endl;
-        if (line.length() >= 3 && line[0] != '=' && line[line.length() -1 ] != '=') {
+        if (line.length() >= 3 && line[0] != '=' && line[line.length() -1 ] != '=' && line[0] != '#') {
             configentry entry;
             string name = line.substr(0, delimiterPos);
             string value = line.substr(delimiterPos + 1, line.length());
@@ -31,6 +31,7 @@ public:
             entries.push_back(entry);
         }
     }
+    PropFile.close();
     return entries;
   }
 };
