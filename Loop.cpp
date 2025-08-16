@@ -160,7 +160,7 @@ static gboolean handle_tick(GtkWidget *widget, GdkFrameClock *frame_clock,
           (myPlayer.getFallTime() + (newTime - oldTime) / 1000000.0);
       g_print("Fall seconds added: %f\n", seconds);
       // float simFallDistance = gSim.getDistance(seconds, myPlayer.getMass());
-      float simFallDistance = gSim.getDistance(seconds);
+      float simFallDistance = gSim.getDistance(seconds, myPlayer.getMass());
       simFallDistance = simFallDistance < 0 ? 0 : simFallDistance;
       fallDistance =
           simFallDistance < maxFallDistance ? simFallDistance : maxFallDistance;
